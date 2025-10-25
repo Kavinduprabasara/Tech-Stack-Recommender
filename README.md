@@ -28,63 +28,91 @@ source ./bin/activate
 
 Or run the bundled interpreter directly:
 
-```bash
-./bin/python advisor/main.py
-```
+# Tech Stack Recommender
 
-## Run options
+A small expert-system that recommends frontend / backend / database stacks based on project requirements. The recommendation engine is implemented as a Prolog knowledge base and the UI is a Streamlit app that calls Prolog through the `pyswip` bridge.
 
-1) Run via the Python wrapper/CLI
+This README documents the actual repository layout and how to run the app locally.
 
-- Activate venv (optional):
+## Repository layout
 
-```bash
-source ./bin/activate
-```
+- `knowledge_base.pl` — Prolog knowledge base with rules and predicates used to derive recommendations.
+- `main.py` — Streamlit-based UI and Python glue code that asserts facts into Prolog and queries recommendations.
+- `requirements.txt` — Python dependencies (e.g. `pyswip`, `streamlit==1.50.0`, `experta`).
+- `tech_env/` — included virtual environment (optional) with Python and helper executables.
 
-- Run the Python entrypoint (assuming `advisor/main.py` is the CLI):
+## What it does
 
-```bash
-python advisor/main.py
-```
+1. The Streamlit UI (`main.py`) collects answers to a set of questions about your project (project type, team size, realtime needs, etc.).
+2. It converts those answers into Prolog facts using `pyswip` and queries the `recommend_stack/5` predicate (or the rules in `knowledge_base.pl`) to get ranked recommendations.
+3. The app shows results in the browser and provides a downloadable JSON report of the recommendations.
 
-Or use the bundled interpreter without activating:
+## Prerequisites
 
-```bash
-./bin/python advisor/main.py
-```
+- Python 3.8+ (the repo includes a `tech_env` venv you can use).
+- SWI-Prolog installed and available on PATH (pyswip requires a working SWI-Prolog binary).
 
-2) Run the Prolog interactive helper directly (if you have SWI-Prolog installed)
+macOS quick install (if needed):
 
 ```bash
-swipl -s advisor/knowledge_base.pl -g "ask_recommendation." -t halt
+# install SWI-Prolog via Homebrew
+brew install swi-prolog
 ```
 
-This will start the question sequence defined in the knowledge base and print a recommendation.
+## Install Python dependencies
 
-## Files of interest
+Activate the included virtualenv (recommended):
 
-- `advisor/knowledge_base.pl` — contains 50 rules with helper predicates `best_recommendation/5`, `all_recommendations/1`, and `ask_recommendation/0`.
-- `advisor/main.py` — Python script to interact with the knowledge base (the exact interface depends on how it's implemented; the `main.py` file is the place to run or inspect for programmatic usage).
+```bash
+source tech_env/bin/activate
+pip install -r requirements.txt
+```
 
-## Example
+Or install directly using the venv's pip (no activate):
 
-A simple run (assuming the Python wrapper calls into the Prolog KB) should prompt questions or print a recommended stack with a confidence score and reason. If you run Prolog directly, `ask_recommendation/0` gathers answers from the user and prints the chosen stack.
+```bash
+./tech_env/bin/pip install -r requirements.txt
+```
 
-## Contributing
+Note: `requirements.txt` currently pins `streamlit==1.50.0`.
 
-- Add or refine rules inside `advisor/knowledge_base.pl`.
-- If you change rule names or API, update `advisor/main.py` accordingly.
+## Run the app (Streamlit)
+
+From the repository root (after installing dependencies):
+
+```bash
+streamlit run main.py
+```
+
+If you use the bundled venv without activating:
+
+```bash
+./tech_env/bin/streamlit run main.py
+```
+
+The app will open in your browser. Answer the questions in the UI and click "Analyze My Project" to get recommendations. You can download the full JSON report from the UI.
+
+## Troubleshooting
+
+- If `main.py` fails to initialize Prolog, ensure SWI-Prolog is installed and the `swipl` binary is on your PATH. On macOS, `brew install swi-prolog` is the usual approach.
+- Ensure `knowledge_base.pl` is in the same directory as `main.py` (it is by default in this repository). `main.py` calls `prolog.consult("knowledge_base.pl")`.
+- If pyswip raises type errors when asserting facts, verify the facts you assert match how predicates are expected in the `.pl` file. The Streamlit UI filters/normalizes values before asserting.
+
+## Development & Contributing
+
+- To update rules, edit `knowledge_base.pl` and keep the predicate names used by `main.py` (e.g. `recommend_stack/5`).
+- To change the UI, edit `main.py`. The code already includes helpful comments and small debug print statements.
 
 ## License
 
-This repository does not include a license file; add `LICENSE` if you want to set one.
+Add a `LICENSE` file if you want a specific license. Otherwise the repo has no explicit license.
 
 ---
 
-If you'd like, I can:
-- Inspect `advisor/main.py` and update the README with exact Python usage examples and flags.
-- Add a minimal `requirements.txt` or `pyproject.toml` for external dependencies.
-- Add a small example script that demonstrates querying the Prolog KB programmatically from Python.
+If you'd like, I can also:
+
+- Pin a version for `experta` in `requirements.txt`.
+- Run the install inside the included `tech_env` and confirm that Streamlit and pyswip are available.
+- Add a small example script that demonstrates a programmatic (non-UI) query to the Prolog KB.
 
 Tell me which of those you'd like next.
