@@ -102,17 +102,3 @@ The app will open in your browser. Answer the questions in the UI and click "Ana
 
 - To update rules, edit `knowledge_base.pl` and keep the predicate names used by `main.py` (e.g. `recommend_stack/5`).
 - To change the UI, edit `main.py`. The code already includes helpful comments and small debug print statements.
-
-## License
-
-Add a `LICENSE` file if you want a specific license. Otherwise the repo has no explicit license.
-
----
-
-If you'd like, I can also:
-
-- Pin a version for `experta` in `requirements.txt`.
-- Run the install inside the included `tech_env` and confirm that Streamlit and pyswip are available.
-- Add a small example script that demonstrates a programmatic (non-UI) query to the Prolog KB.
-
-Tell me which of those you'd like next.
